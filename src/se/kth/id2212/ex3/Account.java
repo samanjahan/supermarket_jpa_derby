@@ -2,6 +2,7 @@ package se.kth.id2212.ex3;
 
 import javax.persistence.*;
 import java.io.Serializable;
+//HElkjasd
 
 @NamedQueries({
         @NamedQuery(
