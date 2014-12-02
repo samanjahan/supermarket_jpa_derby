@@ -36,20 +36,24 @@ public class Person implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     
-    @OneToMany(cascade=CascadeType.PERSIST, mappedBy="owner")
+    @OneToMany(cascade=CascadeType.ALL, mappedBy="owner")
     private List<Item> items;
 
     
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false,unique = true)
     private String name;
+    
+     @Column(name = "pass", nullable = false)
+    private String psw;
 
     public Long getId() {
         return id;
     }
     
 
-    public Person(String name){
+    public Person(String name,String pwd){
         this.name = name;
+        this.psw = pwd;
     }
     
      public Person(){
@@ -111,24 +115,27 @@ public class Person implements Serializable {
         em.getTransaction().commit();
     }
     
-    public void deleteItem(String name){
+    public boolean deleteItem(String name){
         EntityManager em = null;
         em = beginTransaction();
         Item item = getItem(name);
         if(item != null){
-            item = em.merge(item);
-           // em.merge(item);
+            item = em.merge(item);     
             em.remove(item);
             commitTransaction(em);
+            return true;
         }
-        
+        return false;
     }
     
     public Item getItem(String name){
         for(int i = 0 ;i < items.size();++i){
             if(items.get(i).getName().equals(name)){
+                System.out.println(items.size());
                 System.out.println("hooohhoo " + items.get(i));
-                return items.get(i);
+                Item item = items.get(i);
+                items.remove(i);
+                return item;
             }
         }
         return null;
