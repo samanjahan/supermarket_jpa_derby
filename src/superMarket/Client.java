@@ -25,6 +25,7 @@ public class Client {
     private static boolean  isConnected = false;
     private static List <String> listWord = new ArrayList<String>();
     private static String clientname;
+    private static String password;
     private static String itemName;
     private static String itemPrice;
     
@@ -33,6 +34,8 @@ public class Client {
     };
     private static int getCommand(String userInput){
         if(userInput.equals("newUser")){
+            clientname = listWord.get(1);
+            password = listWord.get(2);
             return 1;
         }
         if(userInput.equals("addItem")){
@@ -43,6 +46,18 @@ public class Client {
         if(userInput.equals("deleteItem")){
             itemName = listWord.get(1);
             return 3;
+        }
+        if(userInput.equals("logOut")){
+            clientname = null;
+            return 4;
+        }
+        if(userInput.equals("logging")){
+            clientname = listWord.get(1);
+            password = listWord.get(2);
+            return 5;
+        }
+        if(userInput.equals("showAllItem")){
+            return 6;
         }
         return 0;
     }
@@ -81,20 +96,46 @@ public class Client {
             switch (getCommend){
                 case 1:
                     if(listWord.size() > 1){
-                        marketPlace.creatPerson(listWord.get(1),listWord.get(2));
-                        listWord.clear();
+                        if(marketPlace.creatPerson(clientname,password)){
+                            System.out.println("Wellcome " + clientname);
                         }else{
-                            System.out.println("more Value");
+                            System.out.println(clientname + " already exists!");
                         }
+                    }
                     listWord.clear();
                     break;
                 case 2:
-                    marketPlace.addItem(itemName,Float.parseFloat(itemPrice));
+                    marketPlace.addItem(itemName,Float.parseFloat(itemPrice),clientname);
+                    System.out.println("succeeded!");
                     listWord.clear();
                     break;
                 case 3:
                     if(marketPlace.deletItem(itemName)){
                         System.out.println("succeeded!");
+                    }
+                    listWord.clear();
+                    break;
+                case 4:
+                    System.out.println("You have successfully logged out!");
+                    listWord.clear();
+                    break;
+                case 5:
+                    if(marketPlace.logging(clientname, password)){
+                        System.out.println("Wellcome " + clientname);
+                        listWord.clear();
+                    }else{
+                        System.out.println("SOOORRRYYYYY");
+                        clientname = null;
+                        listWord.clear();
+                    }
+                    break;
+                case 6:
+                  //  marketPlace.listAllItem(clientname);
+                    String items = marketPlace.listAllItem(clientname);
+                    StringTokenizer sto;
+                    st2 = new StringTokenizer(items, " ");
+                    while(st2.hasMoreElements()){
+                        System.out.println(st2.nextElement());
                     }
                     listWord.clear();
                     break;
