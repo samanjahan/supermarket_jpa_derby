@@ -14,18 +14,28 @@ import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.Persistence;
 
 /**
  *
  * @author syst3m
  */
+@NamedQueries({
+    @NamedQuery(
+    name="findAllUser",
+    query="SELECT name FROM Person Name "
+    ),
+    @NamedQuery(
+            name = "findUser",
+            query="SELECT Name FROM Person Name WHERE Name.name LIKE :userName")
+    }
+)
 @Entity(name = "Person")
 public class Person implements Serializable {
     
@@ -36,20 +46,32 @@ public class Person implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     
-    @OneToMany(cascade=CascadeType.PERSIST, mappedBy="owner")
+    @OneToMany(cascade=CascadeType.ALL, mappedBy="owner")
     private List<Item> items;
 
     
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false,unique = true)
     private String name;
+    
+     @Column(name = "pass", nullable = false)
+    private String password;
 
     public Long getId() {
         return id;
     }
     
+    public String getName(){
+        return name;
+    }
+    
+    public String getPassword(){
+        return password;
+    }
+    
 
-    public Person(String name){
+    public Person(String name,String password){
         this.name = name;
+        this.password = password;
     }
     
      public Person(){
@@ -111,27 +133,44 @@ public class Person implements Serializable {
         em.getTransaction().commit();
     }
     
-    public void deleteItem(String name){
+    public boolean deleteItem(String name){
         EntityManager em = null;
         em = beginTransaction();
         Item item = getItem(name);
         if(item != null){
-            item = em.merge(item);
-           // em.merge(item);
+            item = em.merge(item);     
             em.remove(item);
             commitTransaction(em);
+            return true;
         }
-        
+        return false;
     }
     
     public Item getItem(String name){
         for(int i = 0 ;i < items.size();++i){
             if(items.get(i).getName().equals(name)){
+                System.out.println(items.size());
                 System.out.println("hooohhoo " + items.get(i));
-                return items.get(i);
+                Item item = items.get(i);
+                items.remove(i);
+                return item;
             }
         }
         return null;
+    }
+    
+    public ArrayList<Item> getALLItems(){
+       EntityManager em = null;
+       em = beginTransaction();
+       List<Item> itemList = em.createNamedQuery("findAllItems", Item.class).getResultList();
+       commitTransaction(em);
+       ArrayList<Item> itm = new ArrayList<>();
+       if(!itemList.isEmpty()){
+           for(int i = 0; i < itemList.size(); ++i){
+              itm.add(itemList.get(i));
+           }
+       }
+       return itm;
     }
     
 }

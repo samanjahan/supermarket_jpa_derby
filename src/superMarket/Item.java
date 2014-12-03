@@ -6,7 +6,6 @@
 package superMarket;
 
 import java.io.Serializable;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -15,11 +14,20 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 
 /**
  *
  * @author syst3m
  */
+
+@NamedQueries({
+    @NamedQuery(
+    name="findAllItems",
+    query="SELECT Name FROM Item Name"
+    )
+})
 @Entity(name = "Item")
 public class Item implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -85,6 +93,10 @@ public class Item implements Serializable {
     
     public String getName(){
         return name;
+    }
+    
+    public  Person getPerson(){
+        return owner;
     }
     
 }
