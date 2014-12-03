@@ -16,7 +16,7 @@ public interface MarketPlace extends Remote {
     public boolean creatPerson(String name, String password) throws RemoteException;
     public boolean deletePerson(String name) throws RemoteException;
     public boolean addItem(String name,float price,String clientName) throws RemoteException;
-    public boolean deletItem(String name) throws RemoteException;
+    public boolean deleteItem(String name,String clientName) throws RemoteException;
     public boolean logging (String name, String password) throws RemoteException;
     public String listAllItem(String clientName) throws RemoteException;
 }

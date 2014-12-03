@@ -113,9 +113,8 @@ public class Person implements Serializable {
          em = beginTransaction();
          Item item = new Item(name, price, Person.this);
          em.persist(item);
-         commitTransaction(em);
          items.add(item);
-            
+         commitTransaction(em);          
     }
     
     
@@ -146,10 +145,15 @@ public class Person implements Serializable {
         return false;
     }
     
-    public Item getItem(String name){
+    public Item getItem(String names){
+        System.out.println(names);
         for(int i = 0 ;i < items.size();++i){
-            if(items.get(i).getName().equals(name)){
-                System.out.println(items.size());
+            
+            String nn =  items.get(0).getName().toString();
+            System.out.println("Items size " + nn);
+            if(nn.equals(names.toString())){
+                System.out.println("hhhääääääääääääärrrrrrrrrrrrrrr");
+                System.out.println(items.get(0));
                 System.out.println("hooohhoo " + items.get(i));
                 Item item = items.get(i);
                 items.remove(i);

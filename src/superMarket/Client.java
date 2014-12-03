@@ -94,6 +94,10 @@ public class Client {
             }
             int getCommend  = getCommand(listWord.get(0));
             switch (getCommend){
+                case 0:
+                    System.out.println("Illegal command");
+                    listWord.clear();
+                    break;
                 case 1:
                     if(listWord.size() > 1){
                         if(marketPlace.creatPerson(clientname,password)){
@@ -110,8 +114,10 @@ public class Client {
                     listWord.clear();
                     break;
                 case 3:
-                    if(marketPlace.deletItem(itemName)){
+                    if(marketPlace.deleteItem(itemName,clientname)){
                         System.out.println("succeeded!");
+                    }else{
+                        System.out.println("Wrong!");
                     }
                     listWord.clear();
                     break;
@@ -130,12 +136,15 @@ public class Client {
                     }
                     break;
                 case 6:
-                  //  marketPlace.listAllItem(clientname);
                     String items = marketPlace.listAllItem(clientname);
-                    StringTokenizer sto;
-                    st2 = new StringTokenizer(items, " ");
-                    while(st2.hasMoreElements()){
-                        System.out.println(st2.nextElement());
+                    if(items.length() > 1){
+                        StringTokenizer sto;
+                        st2 = new StringTokenizer(items, "-");                   
+                        while(st2.hasMoreElements()){
+                            System.out.println(st2.nextElement());
+                        }
+                    }else{
+                        System.out.println("No item!");
                     }
                     listWord.clear();
                     break;

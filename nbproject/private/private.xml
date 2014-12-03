@@ -4,10 +4,11 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/home/syst3m/NetBeansProjects/HW3/src/superMarket/Person.java</file>
-            <file>file:/home/syst3m/NetBeansProjects/HW3/src/superMarket/Client.java</file>
             <file>file:/home/syst3m/NetBeansProjects/HW3/src/superMarket/MarketPlaceImpl.java</file>
+            <file>file:/home/syst3m/NetBeansProjects/HW3/src/superMarket/Client.java</file>
             <file>file:/home/syst3m/NetBeansProjects/HW3/src/superMarket/Item.java</file>
             <file>file:/home/syst3m/NetBeansProjects/HW3/src/superMarket/MarketPlace.java</file>
+            <file>file:/home/syst3m/NetBeansProjects/HW3/src/superMarket/Test.java</file>
         </group>
     </open-files>
 </project-private>
