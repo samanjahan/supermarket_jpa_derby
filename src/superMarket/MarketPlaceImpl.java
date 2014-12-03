@@ -8,7 +8,6 @@ package superMarket;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -67,7 +66,8 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace{
     }
 
     @Override
-    public boolean deletItem(String name) throws RemoteException {
+    public boolean deleteItem(String name, String clientName) throws RemoteException {
+        person = getUser(clientName);
        if((person.deleteItem(name))){
            return true;
        }
@@ -148,7 +148,7 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace{
         StringBuilder st = new StringBuilder();
         if(!li.isEmpty()){
             for(int i = 0 ; i < li.size(); ++i){
-                st.append(li.get(i).getName() + " ");
+                st.append("Name: " + li.get(i).getName() + " " + "price: " + String.valueOf(li.get(i).getPrice())  + " " + "userName: " +li.get(i).getPersonName() + "-");
             }
         }
         return st.toString();

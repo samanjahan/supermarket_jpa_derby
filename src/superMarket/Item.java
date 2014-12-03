@@ -57,6 +57,10 @@ public class Item implements Serializable {
         this.owner = owner;
     }
     
+    public float getPrice(){
+        return price;
+    }
+    
     
     public Long getId() {
         return id;
@@ -97,6 +101,9 @@ public class Item implements Serializable {
     
     public  Person getPerson(){
         return owner;
+    }
+      public String getPersonName(){
+        return owner.getName() + "  ";
     }
     
 }

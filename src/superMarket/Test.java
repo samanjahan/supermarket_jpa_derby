@@ -21,28 +21,21 @@ public class Test {
     public static void main(String[] args) throws Exception{
      Test t = new Test();
      Person p = new Person("Andre","123");
-     Person p2 = new Person("alex","123");
-     Person p3 = new Person("Saman","123");
      EntityManager em = null;
      em = t.beginTransaction();
      em.persist(p);
-     em.persist(p2);
-     em.persist(p3);
      t.commitTransaction(em);
-     em = t.beginTransaction();
+ //    em = t.beginTransaction();
     // Person pr = t.getPerson("Andre",em);
    //  System.out.println("TESTTT " + pr);
     // t.commitTransaction(em);
    
-   // em = t.beginTransaction();   
+    em = t.beginTransaction();   
      float price = 200;
      
   //  Item item = new Item("Tv", price,p2);
-    p2.newItem("Tv", price);
-    p2.newItem("Tv", price);
-    p.newItem("Tv", price);
-    
-    p2.deleteItem("Tv");
+    p.newItem("Tv", price);  
+    p.deleteItem("Tv");
     
    t.commitTransaction(em);
    
@@ -51,8 +44,8 @@ public class Test {
  //  em.remove(p);
  //  t.commitTransaction(em);
    //  em = t.beginTransaction();
-    List<Item> li = em.createNamedQuery("findAllItems", Item.class).getResultList();
-        System.out.println("Bingoo " + li.get(1).getName());
+   // List<Item> li = em.createNamedQuery("findAllItems", Item.class).getResultList();
+   //     System.out.println("Bingoo " + li.get(1).getName());
    // t.commitTransaction(em);
      //   String name = p2.getName();
      //   System.out.println(name);
