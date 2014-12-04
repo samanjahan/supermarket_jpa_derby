@@ -7,16 +7,18 @@ package superMarket;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
 
 /**
  *
  * @author syst3m
  */
 public interface MarketPlace extends Remote {
-    public boolean creatPerson(String name, String password) throws RemoteException;
-    public boolean deletePerson(String name) throws RemoteException;
-    public boolean addItem(String name,float price,String clientName) throws RemoteException;
-    public boolean deleteItem(String name,String clientName) throws RemoteException;
-    public boolean logging (String name, String password) throws RemoteException;
-    public String listAllItem(String clientName) throws RemoteException;
+    public Person createPerson(String name, String password) throws RemoteException;
+    //public boolean deletePerson(String name) throws RemoteException;
+    public boolean addItem(String name,float price) throws RemoteException;
+    public boolean deleteItem(String itemName) throws RemoteException;
+    public Person checkLogin (String name, String password) throws RemoteException;
+    public List<Item> listAllItem() throws RemoteException;
+	public boolean buyItem(String item,Person buyer, String seller) throws RemoteException;
 }

@@ -20,11 +20,13 @@ public class Test {
     private static EntityManagerFactory emFactory = Persistence.createEntityManagerFactory("HW3PU2");
     public static void main(String[] args) throws Exception{
      Test t = new Test();
-     Person p = new Person("Andre","123");
+     Person p = new Person("Alex","1234");
+     //Person p1 = new Person("Adam","1234");
      EntityManager em = null;
-     em = t.beginTransaction();
-     em.persist(p);
-     t.commitTransaction(em);
+     //em = t.beginTransaction();
+     //em.persist(p);
+     //em.persist(p1);
+     //t.commitTransaction(em);
  //    em = t.beginTransaction();
     // Person pr = t.getPerson("Andre",em);
    //  System.out.println("TESTTT " + pr);
@@ -34,9 +36,8 @@ public class Test {
      float price = 200;
      
   //  Item item = new Item("Tv", price,p2);
-    p.newItem("Tv", price);  
-    p.deleteItem("Tv");
-    
+    //p.newItem("Tv", price);
+    //p.deleteItem("Tv");
    t.commitTransaction(em);
    
   // em = t.beginTransaction();

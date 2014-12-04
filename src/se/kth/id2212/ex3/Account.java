@@ -84,8 +84,14 @@ public class Account implements Serializable
         System.out.println("Transaction: Account " + owner.getName() + ": deposit: $" +
                 value + ", balance: $" + balance);
     }
+    
+    
 
-    public String toString()
+    public Owner getOwner() {
+		return owner;
+	}
+
+	public String toString()
     {
         return "Account for " + owner.getName() + " has balance $" + balance;
     }

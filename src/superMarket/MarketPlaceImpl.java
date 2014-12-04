@@ -11,146 +11,218 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 
+import se.kth.id2212.ex3.Account;
 
 /**
- *
+ * 
  * @author syst3m
  */
-public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace{
-    private EntityManagerFactory emFactory;
-    private Person person;
-    private Item item;
-   private EntityManager em = null;
-    
-    public MarketPlaceImpl() throws RemoteException{
-        super();
-    }
+public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace {
+	private static final long serialVersionUID = 3966447356658262847L;
+	private EntityManagerFactory emFactory;
+	private Person person;
+	// private Item item;
+	private EntityManager em = null;
 
-    @Override
-    public boolean creatPerson(String name, String password) throws RemoteException {
-        em = beginTransaction();
-        if(!checkUser(name) ){//&& //password.length() > 7//){      
-            person = new Person(name,password);
-            em.persist(person);
-            commitTransaction(em);
-            return true;
-        }
-       // commitTransaction(em);
-        return false;
-    }
+	public MarketPlaceImpl() throws RemoteException {
+		super();
+	}
 
-    @Override
-    public boolean deletePerson(String name) throws RemoteException {
-        person.deleteItem(name);
-        return true;
-    }
+	@Override
+	public Person createPerson(String name, String password)
+			throws RemoteException {
+		em = beginTransaction();
+		if (!checkUser(name)) {// && //password.length() > 7//){
+			person = new Person(name, password);
+			em.persist(person);
+			commitTransaction(em);
+		}
+		// commitTransaction(em);
+		return person;
+	}
 
-    @Override
-    public boolean addItem(String name, float price,String clientName) throws RemoteException {
-        Person person = getUser(clientName);
-        if(person != null){
-            try {
-                person.newItem(name, price);
-                return true;
-            } catch (RejectedException ex) {
-                Logger.getLogger(MarketPlaceImpl.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
-        }
-        return false;
-    }
+	/*
+	 * @Override public boolean deletePerson(String name) throws RemoteException
+	 * { person.deleteItem(name); return true; }
+	 */
 
-    @Override
-    public boolean deleteItem(String name, String clientName) throws RemoteException {
-        person = getUser(clientName);
-       if((person.deleteItem(name))){
-           return true;
-       }
-       return false;
-    }
-    
-    private EntityManager beginTransaction(){
-        emFactory = Persistence.createEntityManagerFactory("HW3PU2");
-        EntityManager em = emFactory.createEntityManager();
-        EntityTransaction transaction = em.getTransaction();
-        transaction.begin();
-        return em;
-    }
+	@Override
+	public boolean addItem(String name, float price) throws RemoteException {
+		boolean rv = false;
+		em = beginTransaction();
+		Item item = new Item(name, price, person);
+		em.persist(item);
+		commitTransaction(em);
+		if (em.find(Item.class, item.getId()) != null) {
+			rv = true;
+		}
+		return rv;
+	}
 
-    private void commitTransaction(EntityManager em){
-        em.getTransaction().commit();
-    }
-    public boolean checkUser(String name){
-      //  em = beginTransaction();
-        List<Person> liUser = em.createNamedQuery("findAllUser", Person.class).getResultList();
-      //  commitTransaction(em);
-        if(!liUser.isEmpty()){
-            for(int i = 0 ; i < liUser.size(); ++i){
-                if(liUser.get(i).getName().equals(name)){
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    
-    public Person getUser(String name){
-        Person findName = null;
-      //  em = beginTransaction();
-        List<Person> existingUsers = em.createNamedQuery("findUser", Person.class).
-            setParameter("userName", name).getResultList();
-      //   commitTransaction(em);
-        if(!existingUsers.isEmpty()){
-            for(int i = 0 ; i < existingUsers.size(); ++i){
-                if(existingUsers.get(i).getName().equals(name)){
-                    findName = existingUsers.get(i);
-                   
-                    return findName;
-                }
-            }
-        }
-        return findName;
-    }
-    
-    public boolean checkLogging(String name,String password){
-        em = beginTransaction();
-        List<Person> li = em.createNamedQuery("findAllUser", Person.class).getResultList();
-        System.out.println(li.size());
-        commitTransaction(em);
-        if(!li.isEmpty()){
-            for(int i = 0 ; i < li.size(); ++i){
-                if(li.get(i).getPassword().equals(password) && li.get(i).getName().equals(name)){
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+	@Override
+	public boolean deleteItem(String itemName) throws RemoteException {
+		boolean rv = false;
 
-    @Override
-    public boolean logging(String name, String password) throws RemoteException {
-        if(checkLogging(name,password)){
-            return  true;
-        }
+		em = beginTransaction();
+		List<Item> li = em.createNamedQuery("findItemsByUser", Item.class)
+				.setParameter("owner", person).getResultList();
+		for (Item i : li) {
+			if (i.getName().equalsIgnoreCase(itemName)) {
+				em.remove(i);
+				rv = true;
+			}
+		}
+		commitTransaction(em);
 
-        return false;
-    }
+		return rv;
+	}
 
-    @Override
-    public String listAllItem(String clientName) throws RemoteException{
-        Person person = getUser(clientName);
-        ArrayList<Item> li = person.getALLItems();
-        StringBuilder st = new StringBuilder();
-        if(!li.isEmpty()){
-            for(int i = 0 ; i < li.size(); ++i){
-                st.append("Name: " + li.get(i).getName() + " " + "price: " + String.valueOf(li.get(i).getPrice())  + " " + "userName: " +li.get(i).getPersonName() + "-");
-            }
-        }
-        return st.toString();
-    }
+	private EntityManager beginTransaction() {
+		emFactory = Persistence.createEntityManagerFactory("HW3PU2");
+		EntityManager em = emFactory.createEntityManager();
+		EntityTransaction transaction = em.getTransaction();
+		transaction.begin();
+		return em;
+	}
+
+	private void commitTransaction(EntityManager em) {
+		em.getTransaction().commit();
+	}
+
+	public boolean checkUser(String name) {
+		// em = beginTransaction();
+		List<Person> liUser = em.createNamedQuery("findAllUser", Person.class)
+				.getResultList();
+		// commitTransaction(em);
+		if (!liUser.isEmpty()) {
+			for (int i = 0; i < liUser.size(); ++i) {
+				if (liUser.get(i).getName().equals(name)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public Person getUser(String name) {
+		Person findName = null;
+		// em = beginTransaction();
+		List<Person> existingUsers = em
+				.createNamedQuery("findUser", Person.class)
+				.setParameter("userName", name).getResultList();
+		// commitTransaction(em);
+		if (!existingUsers.isEmpty()) {
+			for (int i = 0; i < existingUsers.size(); ++i) {
+				if (existingUsers.get(i).getName().equals(name)) {
+					findName = existingUsers.get(i);
+					return findName;
+				}
+			}
+		}
+		return findName;
+	}
+
+	public Person checkLogin(String name, String password)
+			throws RemoteException {
+		em = beginTransaction();
+		List<Person> li = em.createNamedQuery("findAllUser", Person.class)
+				.getResultList();
+		System.out.println(li.size());
+		commitTransaction(em);
+		if (!li.isEmpty()) {
+			for (int i = 0; i < li.size(); ++i) {
+				if (li.get(i).getPassword().equals(password)
+						&& li.get(i).getName().equals(name)) {
+					person = li.get(i);
+				}
+			}
+		}
+		return person;
+	}
+
+	@Override
+	public boolean buyItem(String item, Person buyer, String seller)
+			throws RemoteException {
+		boolean rv = false;
+		Person person = getUser(seller);
+		em = beginTransaction();
+		List<Item> li = em.createNamedQuery("findItemsByUser", Item.class)
+				.setParameter("owner", person).getResultList();
+		for (Item i : li) {
+			if (i.getName().equalsIgnoreCase(item)) {
+
+				EntityManagerFactory emFactory2 = Persistence
+						.createEntityManagerFactory("HW3Bank");
+				EntityManager em2 = emFactory2.createEntityManager();
+				EntityTransaction transaction2 = em2.getTransaction();
+				transaction2.begin();
+
+				Account sellerAccount = null;
+				Account buyerAccount = null;
+				try {
+					sellerAccount = em2
+							.createNamedQuery("findAccountWithName",
+									Account.class)
+							.setParameter("ownerName", seller)
+							.getSingleResult();
+					buyerAccount = em2
+							.createNamedQuery("findAccountWithName",
+									Account.class)
+							.setParameter("ownerName", buyer.getName())
+							.getSingleResult();
+					if (i.getPrice() <= buyerAccount.getBalance()) {
+						buyerAccount.withdraw(i.getPrice());
+						sellerAccount.deposit(i.getPrice());
+						em.remove(i);
+						// em.createNamedQuery("deleteItem",Item.class).setParameter("item",
+						// i).executeUpdate();
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				commitTransaction(em2);
+				rv = true;
+			}
+
+		}
+		commitTransaction(em);
+
+		return rv;
+	}
+
+	@Override
+	public List<Item> listAllItem() throws RemoteException {
+
+		em = beginTransaction();
+		List<Item> itemList = em.createNamedQuery("findAllItems", Item.class)
+				.getResultList();
+		commitTransaction(em);
+
+		return itemList;
+	}
+
+	/*
+	 * public boolean deleteItem(String name) { EntityManager em = null; em =
+	 * beginTransaction(); Item item = getItem(name); if (item != null) { item =
+	 * em.merge(item); em.remove(item); commitTransaction(em); return true; }
+	 * return false; }
+	 */
+	/*
+	 * public Item getItem(String names) { System.out.println(names); for (int i
+	 * = 0; i < items.size(); ++i) {
+	 * 
+	 * String nn = items.get(0).getName().toString();
+	 * System.out.println("Items size " + nn); if (nn.equals(names.toString()))
+	 * { System.out .println("hhhääääääääääääärrrrrrrrrrrrrrr");
+	 * System.out.println(items.get(0)); System.out.println("hooohhoo " +
+	 * items.get(i)); Item item = items.get(i); items.remove(i); return item; }
+	 * } return null; }
+	 */
+
 }
