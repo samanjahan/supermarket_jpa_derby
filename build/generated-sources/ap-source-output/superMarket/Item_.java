@@ -5,7 +5,7 @@ import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
 import superMarket.Person;
 
-@Generated(value="EclipseLink-2.5.2.v20140319-rNA", date="2014-12-04T16:11:06")
+@Generated(value="EclipseLink-2.5.2.v20140319-rNA", date="2014-12-04T17:38:14")
 @StaticMetamodel(Item.class)
 public class Item_ { 
 

@@ -17,7 +17,7 @@ public class BankImpl extends UnicastRemoteObject implements Bank
     public BankImpl() throws RemoteException
     {
         super();
-        emFactory = Persistence.createEntityManagerFactory("HW3PU");
+        emFactory = Persistence.createEntityManagerFactory("HW3Bank");
     }
 
     public Account newAccount(String name) throws RejectedException
