@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -19,7 +20,7 @@ import java.util.StringTokenizer;
  *
  * @author syst3m
  */
-public class Client {
+public class Client  extends UnicastRemoteObject implements CallBack{
     static MarketPlace marketPlace;
     private static final String DEFAULT_MarketPlace_NAME = "Blocket";
     private static boolean  isConnected = false;
@@ -28,6 +29,10 @@ public class Client {
     private static String password;
     private static String itemName;
     private static String itemPrice;
+   
+    public Client() throws RemoteException{
+        super();
+    }
     
     static enum CommandName {
         newUser, deleteUser, logging,logOut,showAllItem, addItem, deleteItem, quit, help, listAllMarket, wish,buy,showMyItem;
@@ -58,6 +63,11 @@ public class Client {
         }
         if(userInput.equals("showAllItem")){
             return 6;
+        }
+        if(userInput.equals("wish")){
+            itemName = listWord.get(1);
+            itemPrice = listWord.get(2);
+            return 7;
         }
         return 0;
     }
@@ -114,9 +124,11 @@ public class Client {
                     listWord.clear();
                     break;
                 case 3:
+                    System.out.println("HÄÄRRR " + clientname);
                     if(marketPlace.deleteItem(itemName,clientname)){
                         System.out.println("succeeded!");
                     }else{
+                        System.out.println(clientname);
                         System.out.println("Wrong!");
                     }
                     listWord.clear();
@@ -148,7 +160,17 @@ public class Client {
                     }
                     listWord.clear();
                     break;
+                case 7:
+                    Client c = new Client();
+                    marketPlace.wish(itemName, itemPrice,c);
+                    System.out.println("Ok!");
+                    listWord.clear();
+                    break;
             }
         }
+    }
+    @Override
+    public void notifyMe(String userName, String itemName) throws RemoteException {
+        System.out.println("User " +  userName + " has " + itemName + "  " + "to sell");    
     }
 }

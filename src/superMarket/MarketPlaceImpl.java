@@ -8,7 +8,9 @@ package superMarket;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.EntityManager;
@@ -25,7 +27,10 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace{
     private EntityManagerFactory emFactory;
     private Person person;
     private Item item;
-   private EntityManager em = null;
+    private EntityManager em = null;
+    private  CallBack client;
+    private Map<String,CallBack> wisheList = new HashMap<String, CallBack>();
+
     
     public MarketPlaceImpl() throws RemoteException{
         super();
@@ -40,22 +45,24 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace{
             commitTransaction(em);
             return true;
         }
-       // commitTransaction(em);
+        commitTransaction(em);
         return false;
     }
 
     @Override
     public boolean deletePerson(String name) throws RemoteException {
+        System.out.println("personn " + person.getName());
         person.deleteItem(name);
         return true;
     }
 
     @Override
     public boolean addItem(String name, float price,String clientName) throws RemoteException {
-        Person person = getUser(clientName);
+        person = getUser(clientName);
         if(person != null){
             try {
                 person.newItem(name, price);
+                chechWish();
                 return true;
             } catch (RejectedException ex) {
                 Logger.getLogger(MarketPlaceImpl.class.getName()).log(Level.SEVERE, null, ex);
@@ -66,11 +73,15 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace{
     }
 
     @Override
-    public boolean deleteItem(String name, String clientName) throws RemoteException {
+    public boolean deleteItem(String itemName, String clientName) throws RemoteException {
         person = getUser(clientName);
-       if((person.deleteItem(name))){
+        System.out.println("Item name MarketPalce " + itemName);
+        System.out.println("personn Name MarketPlace " + person.getName());
+       if((person.deleteItem(itemName))){
+           System.out.println("TRUUUEEEEEEEEE");
            return true;
        }
+        System.out.println("FALSSSEEEEEEEE");
        return false;
     }
     
@@ -109,7 +120,6 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace{
             for(int i = 0 ; i < existingUsers.size(); ++i){
                 if(existingUsers.get(i).getName().equals(name)){
                     findName = existingUsers.get(i);
-                   
                     return findName;
                 }
             }
@@ -125,6 +135,8 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace{
         if(!li.isEmpty()){
             for(int i = 0 ; i < li.size(); ++i){
                 if(li.get(i).getPassword().equals(password) && li.get(i).getName().equals(name)){
+                    String personName = li.get(i).getName();
+                    person = getUser(personName);
                     return true;
                 }
             }
@@ -135,6 +147,7 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace{
     @Override
     public boolean logging(String name, String password) throws RemoteException {
         if(checkLogging(name,password)){
+            chechWish();
             return  true;
         }
 
@@ -152,5 +165,32 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace{
             }
         }
         return st.toString();
+    }
+
+    @Override
+    public void wish(String name, String price,CallBack client) throws RemoteException {
+        String item = name + " " + price;
+        wisheList.put(item , client);
+    }
+
+    @Override
+    public void chechWish() throws RemoteException {
+        ArrayList<Item> itemList = person.getALLItems();
+        if(!wisheList.isEmpty() && !itemList.isEmpty()){
+            for(String keyItem : wisheList.keySet()){
+                client  = wisheList.get(keyItem);
+                String[] itemNameList = keyItem.split(" ");
+                String itemName = itemNameList[0].toString();
+                
+                for(int i = 0 ; i < itemList.size();++i){
+                    Float price = Float.valueOf(itemNameList[1]);
+                    if(itemList.get(i).getName().equals(itemName) && itemList.get(i).getPrice() <= price){
+                        wisheList.remove(keyItem);
+                        client.notifyMe(itemList.get(i).getPersonName(), itemName);
+                    }
+                }
+                
+            }
+        }
     }
 }
