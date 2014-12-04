@@ -162,7 +162,7 @@ public class Client  extends UnicastRemoteObject implements CallBack{
                     break;
                 case 7:
                     Client c = new Client();
-                    marketPlace.wish(itemName, itemPrice,c);
+                    marketPlace.wish(itemName, itemPrice, clientname,c);
                     System.out.println("Ok!");
                     listWord.clear();
                     break;

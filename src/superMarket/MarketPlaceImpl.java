@@ -30,6 +30,7 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace{
     private EntityManager em = null;
     private  CallBack client;
     private Map<String,CallBack> wisheList = new HashMap<String, CallBack>();
+    private String clientWishName;
 
     
     public MarketPlaceImpl() throws RemoteException{
@@ -168,14 +169,16 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace{
     }
 
     @Override
-    public void wish(String name, String price,CallBack client) throws RemoteException {
-        String item = name + " " + price;
+    public void wish(String name, String price,String clientName,CallBack client) throws RemoteException {
+        String item = name + " " + price + " " + clientName;
+        clientWishName = clientName;
         wisheList.put(item , client);
     }
 
     @Override
     public void chechWish() throws RemoteException {
         ArrayList<Item> itemList = person.getALLItems();
+        System.err.println("chechwish person Name: "  + person.getName());
         if(!wisheList.isEmpty() && !itemList.isEmpty()){
             for(String keyItem : wisheList.keySet()){
                 client  = wisheList.get(keyItem);
@@ -184,8 +187,9 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace{
                 
                 for(int i = 0 ; i < itemList.size();++i){
                     Float price = Float.valueOf(itemNameList[1]);
-                    if(itemList.get(i).getName().equals(itemName) && itemList.get(i).getPrice() <= price){
+                    if(itemList.get(i).getName().equals(itemName) && itemList.get(i).getPrice() <= price && person.getName().equals(clientWishName)){
                         wisheList.remove(keyItem);
+                        System.out.println("keyItem" + keyItem);
                         client.notifyMe(itemList.get(i).getPersonName(), itemName);
                     }
                 }
