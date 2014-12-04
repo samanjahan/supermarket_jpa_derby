@@ -184,10 +184,10 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace{
                 client  = wisheList.get(keyItem);
                 String[] itemNameList = keyItem.split(" ");
                 String itemName = itemNameList[0].toString();
-                
+                String wishClient = itemNameList[2].toString();
                 for(int i = 0 ; i < itemList.size();++i){
                     Float price = Float.valueOf(itemNameList[1]);
-                    if(itemList.get(i).getName().equals(itemName) && itemList.get(i).getPrice() <= price && person.getName().equals(clientWishName)){
+                    if(itemList.get(i).getName().equals(itemName) && itemList.get(i).getPrice() <= price && clientWishName.equals(wishClient)){
                         wisheList.remove(keyItem);
                         System.out.println("keyItem" + keyItem);
                         client.notifyMe(itemList.get(i).getPersonName(), itemName);
