@@ -13,7 +13,7 @@
 			<property name="javax.persistence.jdbc.driver" value="org.apache.derby.jdbc.ClientDriver" />
 		</properties>
 	</persistence-unit>
-	<persistence-unit name="HW3PU2" transaction-type="RESOURCE_LOCAL">
+	<persistence-unit name="HW3Market" transaction-type="RESOURCE_LOCAL">
 		<class>superMarket.Item</class>
 		<class>superMarket.Person</class>
 		<properties>
@@ -22,6 +22,8 @@
 			<property name="javax.persistence.jdbc.user" value="root" />
 			<property name="javax.persistence.jdbc.password" value="root" />
 			<property name="javax.persistence.jdbc.driver" value="org.apache.derby.jdbc.ClientDriver" />
+			<property name="javax.persistence.schema-generation.database.action"
+				value="drop-and-create" />
 		</properties>
 	</persistence-unit>
 </persistence>

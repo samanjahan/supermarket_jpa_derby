@@ -84,7 +84,7 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace 
 	}
 
 	private EntityManager beginTransaction() {
-		emFactory = Persistence.createEntityManagerFactory("HW3PU2");
+		emFactory = Persistence.createEntityManagerFactory("HW3Market");
 		EntityManager em = emFactory.createEntityManager();
 		EntityTransaction transaction = em.getTransaction();
 		transaction.begin();
@@ -133,7 +133,6 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace 
 		em = beginTransaction();
 		List<Person> li = em.createNamedQuery("findAllUser", Person.class)
 				.getResultList();
-		System.out.println(li.size());
 		commitTransaction(em);
 		if (!li.isEmpty()) {
 			for (int i = 0; i < li.size(); ++i) {
@@ -207,22 +206,5 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace 
 		return itemList;
 	}
 
-	/*
-	 * public boolean deleteItem(String name) { EntityManager em = null; em =
-	 * beginTransaction(); Item item = getItem(name); if (item != null) { item =
-	 * em.merge(item); em.remove(item); commitTransaction(em); return true; }
-	 * return false; }
-	 */
-	/*
-	 * public Item getItem(String names) { System.out.println(names); for (int i
-	 * = 0; i < items.size(); ++i) {
-	 * 
-	 * String nn = items.get(0).getName().toString();
-	 * System.out.println("Items size " + nn); if (nn.equals(names.toString()))
-	 * { System.out .println("hhhääääääääääääärrrrrrrrrrrrrrr");
-	 * System.out.println(items.get(0)); System.out.println("hooohhoo " +
-	 * items.get(i)); Item item = items.get(i); items.remove(i); return item; }
-	 * } return null; }
-	 */
 
 }
