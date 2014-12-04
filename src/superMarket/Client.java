@@ -25,8 +25,7 @@ public class Client extends UnicastRemoteObject implements CallBack {
 	public Client() throws RemoteException {
 		super();
 	}
-	
-	
+
 	private static final long serialVersionUID = -2316217043708335891L;
 	static MarketPlace marketPlace;
 	private static final String DEFAULT_MarketPlace_NAME = "Blocket";
@@ -39,7 +38,7 @@ public class Client extends UnicastRemoteObject implements CallBack {
 	private static Person currentUser = null;
 
 	static enum CommandName {
-		newUser, deleteUser, login, logOut, showAllItem, addItem, deleteItem, help, listAllMarket, wish, buy;
+		newUser, deleteUser, login, logOut, showAllItem, addItem, deleteItem, help, listAllMarket, wish, buy, status;
 	};
 
 	private static int getCommand(String userInput) {
@@ -78,6 +77,9 @@ public class Client extends UnicastRemoteObject implements CallBack {
 			itemName = listWord.get(1);
 			itemPrice = listWord.get(2);
 			return 8;
+		}
+		if (userInput.equals("status")) {
+			return 9;
 		}
 		return 0;
 	}
@@ -131,13 +133,13 @@ public class Client extends UnicastRemoteObject implements CallBack {
 					if (currentUser != null) {
 						System.out.println("Welcome " + clientname);
 					} else {
-						System.out.println(clientname + " already exists!");
+						System.out.println(clientname + " already exists or password must be at least 8 characters");
 					}
 				}
 				listWord.clear();
 				break;
 			case 2:
-				if (marketPlace.addItem(itemName, Float.parseFloat(itemPrice))) {
+				if (marketPlace.addItem(itemName, Float.parseFloat(itemPrice),currentUser)) {
 					System.out.println("succeeded!");
 				} else {
 					System.out.println("Could not add Item");
@@ -145,7 +147,7 @@ public class Client extends UnicastRemoteObject implements CallBack {
 				listWord.clear();
 				break;
 			case 3:
-				if (marketPlace.deleteItem(itemName)) {
+				if (marketPlace.deleteItem(itemName,currentUser)) {
 					System.out.println("succeeded!");
 				} else {
 					System.out.println("Could not delete item!");
@@ -197,12 +199,20 @@ public class Client extends UnicastRemoteObject implements CallBack {
 				System.out.println("OK!");
 				listWord.clear();
 				break;
+			case 9:
+				int[] status = marketPlace.status(currentUser);
+				System.out.println("Bought: " + status[0] + " Sold: " + status[1]);
+				listWord.clear();
+				break;
 
 			}
 		}
 	}
-	 @Override
-	 public void notifyMe(String userName, String itemName) throws RemoteException {
-	 System.out.println("User " + userName + " has " + itemName + " " + "to sell");
-	 }
+
+	@Override
+	public void notifyMe(String userName, String itemName)
+			throws RemoteException {
+		System.out.println("User " + userName + " has " + itemName + " "
+				+ "to sell");
+	}
 }

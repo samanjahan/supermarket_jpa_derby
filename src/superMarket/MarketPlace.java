@@ -14,9 +14,9 @@ public interface MarketPlace extends Remote {
 			throws RemoteException;
 
 	// public boolean deletePerson(String name) throws RemoteException;
-	public boolean addItem(String name, float price) throws RemoteException;
+	public boolean addItem(String name, float price, Person seller) throws RemoteException;
 
-	public boolean deleteItem(String itemName) throws RemoteException;
+	public boolean deleteItem(String itemName,Person person) throws RemoteException;
 
 	public Person checkLogin(String name, String password)
 			throws RemoteException;
@@ -30,4 +30,5 @@ public interface MarketPlace extends Remote {
 			throws RemoteException;
 
 	public void checkWish() throws RemoteException;
+	public int[] status(Person person) throws RemoteException;
 }

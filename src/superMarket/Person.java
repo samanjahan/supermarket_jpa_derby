@@ -19,12 +19,10 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 
-/**
- * 
- * @author syst3m
- */
 @NamedQueries({
 		@NamedQuery(name = "findAllUser", query = "SELECT name FROM Person Name "),
+		@NamedQuery(name = "updateSold", query = "UPDATE Person p SET p.sold = :number WHERE p = :person"),
+		@NamedQuery(name = "updateBought", query = "UPDATE Person p SET p.bought = :number WHERE p = :person"),
 		@NamedQuery(name = "findUser", query = "SELECT Name FROM Person Name WHERE Name.name LIKE :userName") })
 @Entity(name = "Person")
 public class Person implements Serializable {
@@ -35,7 +33,7 @@ public class Person implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
-	@OneToMany(cascade=CascadeType.ALL, mappedBy="owner")
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "owner")
 	private List<Item> items;
 
 	@Column(name = "name", nullable = false, unique = true)
@@ -43,6 +41,12 @@ public class Person implements Serializable {
 
 	@Column(name = "pass", nullable = false)
 	private String password;
+
+	@Column(name = "bought")
+	private int bought;
+
+	@Column(name = "sold")
+	private int sold;
 
 	public Long getId() {
 		return id;
@@ -56,9 +60,19 @@ public class Person implements Serializable {
 		return password;
 	}
 
+	public int getBought() {
+		return bought;
+	}
+
+	public int getSold() {
+		return sold;
+	}
+
 	public Person(String name, String password) {
 		this.name = name;
 		this.password = password;
+		this.bought = 0;
+		this.sold = 0;
 	}
 
 	public Person() {
@@ -89,6 +103,14 @@ public class Person implements Serializable {
 			return false;
 		}
 		return true;
+	}
+
+	public void increaseBuy() {
+		bought++;
+	}
+
+	public void increaseSold() {
+		sold++;
 	}
 
 	@Override

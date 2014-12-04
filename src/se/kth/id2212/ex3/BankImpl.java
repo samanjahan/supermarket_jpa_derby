@@ -78,7 +78,6 @@ public class BankImpl extends UnicastRemoteObject implements Bank
         try
         {
             em = beginTransaction();
-
             Account account = getAccount(ownerName, em);
             return account;
         } finally
@@ -112,8 +111,10 @@ public class BankImpl extends UnicastRemoteObject implements Bank
 
         try
         {
-            return (Account) em.createNamedQuery("findAccountWithName").
-                    setParameter("ownerName", ownerName).getSingleResult();
+        	Account acc = (Account) em.createNamedQuery("findAccountWithName").
+            setParameter("ownerName", ownerName).getSingleResult();
+        	em.refresh(acc);
+            return acc;
         } catch (NoResultException noSuchAccount)
         {
             return null;

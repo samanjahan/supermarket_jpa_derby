@@ -18,11 +18,10 @@ import javax.persistence.Persistence;
 
 import se.kth.id2212.ex3.Account;
 
-
 public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace {
 	private static final long serialVersionUID = 3966447356658262847L;
 	private EntityManagerFactory emFactory;
-	private Person person;
+	// private Person person;
 	private CallBack client;
 	private EntityManager em = null;
 	private Map<String, CallBack> wishList = new HashMap<String, CallBack>();
@@ -34,8 +33,9 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace 
 	@Override
 	public Person createPerson(String name, String password)
 			throws RemoteException {
+		Person person = null;
 		em = beginTransaction();
-		if (!checkUser(name)) {// && //password.length() > 7//){
+		if (!checkUser(name) && password.length() > 7) {
 			person = new Person(name, password);
 			em.persist(person);
 			commitTransaction(em);
@@ -50,10 +50,11 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace 
 	 */
 
 	@Override
-	public boolean addItem(String name, float price) throws RemoteException {
+	public boolean addItem(String name, float price, Person seller)
+			throws RemoteException {
 		boolean rv = false;
 		em = beginTransaction();
-		Item item = new Item(name, price, person);
+		Item item = new Item(name, price, seller);
 		em.persist(item);
 		commitTransaction(em);
 		if (em.find(Item.class, item.getId()) != null) {
@@ -64,7 +65,8 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace 
 	}
 
 	@Override
-	public boolean deleteItem(String itemName) throws RemoteException {
+	public boolean deleteItem(String itemName, Person person)
+			throws RemoteException {
 		boolean rv = false;
 
 		em = beginTransaction();
@@ -128,6 +130,7 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace 
 
 	public Person checkLogin(String name, String password)
 			throws RemoteException {
+		Person person = null;
 		em = beginTransaction();
 		List<Person> li = em.createNamedQuery("findAllUser", Person.class)
 				.getResultList();
@@ -148,22 +151,21 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace 
 	public boolean buyItem(String item, Person buyer, String seller)
 			throws RemoteException {
 		boolean rv = false;
-		Person person = getUser(seller);
+		Person sellerPerson = getUser(seller);
+		Person buyerPerson = getUser(buyer.getName());
 		em = beginTransaction();
 		List<Item> li = em.createNamedQuery("findItemsByUser", Item.class)
-				.setParameter("owner", person).getResultList();
+				.setParameter("owner", sellerPerson).getResultList();
 		for (Item i : li) {
 			if (i.getName().equalsIgnoreCase(item)) {
-
-				EntityManagerFactory emFactory2 = Persistence
-						.createEntityManagerFactory("HW3Bank");
-				EntityManager em2 = emFactory2.createEntityManager();
-				EntityTransaction transaction2 = em2.getTransaction();
-				transaction2.begin();
-
-				Account sellerAccount = null;
-				Account buyerAccount = null;
 				try {
+					EntityManagerFactory emFactory2 = Persistence
+							.createEntityManagerFactory("HW3Bank");
+					EntityManager em2 = emFactory2.createEntityManager();
+					EntityTransaction transaction2 = em2.getTransaction();
+					transaction2.begin();
+					Account sellerAccount = null;
+					Account buyerAccount = null;
 					sellerAccount = em2
 							.createNamedQuery("findAccountWithName",
 									Account.class)
@@ -177,15 +179,31 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace 
 					if (i.getPrice() <= buyerAccount.getBalance()) {
 						buyerAccount.withdraw(i.getPrice());
 						sellerAccount.deposit(i.getPrice());
-						//em.remove(i);
-						em.createNamedQuery("deleteItem",Item.class).setParameter("item",
-						i).executeUpdate();
+						// em.remove(i);
+						
+						
+						em.createNamedQuery("deleteItem", Item.class)
+								.setParameter("item", i).executeUpdate();
+						int n = sellerPerson.getSold()+1;
+						System.out.println("get sold " + n);
+						em.createNamedQuery("updateSold", Person.class).setParameter("number", n).setParameter("person", sellerPerson).executeUpdate();
+						n = buyerPerson.getBought()+1;
+						System.out.println("get bought " + n);
+						em.createNamedQuery("updateBought", Person.class).setParameter("number", n).setParameter("person", buyerPerson).executeUpdate();
+						//buyerPerson.increaseBuy();
+						//sellerPerson.increaseSold();
+						//System.out.println("buyer bought : " + buyerPerson.getBought());
+						//System.out.println("seller sold : " + sellerPerson.getSold());
+						em.flush();
+						rv = true;
+						em2.persist(buyerAccount);
+						em2.persist(sellerAccount);
+						commitTransaction(em2);
 					}
 				} catch (Exception e) {
+					System.out.println("Could not perform the buy");
 					e.printStackTrace();
 				}
-				commitTransaction(em2);
-				rv = true;
 			}
 
 		}
@@ -209,28 +227,43 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace 
 	public void wish(String name, String price, CallBack client)
 			throws RemoteException {
 		String item = name + " " + price;
-		wishList.put(item, client);
+		synchronized (wishList) {
+			wishList.put(item, client);
+		}
 	}
 
 	@Override
 	public void checkWish() throws RemoteException {
-		List<Item> itemList = listAllItem();
-		if (!wishList.isEmpty() && !itemList.isEmpty()) {
-			for (String keyItem : wishList.keySet()) {
-				client = wishList.get(keyItem);
-				String[] itemNameList = keyItem.split(" ");
-				String itemName = itemNameList[0].toString();
-				for (int i = 0; i < itemList.size(); ++i) {
-					Float price = Float.valueOf(itemNameList[1]);
-					if (itemList.get(i).getName().equals(itemName)
-							&& itemList.get(i).getPrice() <= price) {
-						wishList.remove(keyItem);
-						client.notifyMe(itemList.get(i).getPersonName(),
-								itemName);
+		synchronized (wishList) {
+			List<Item> itemList = listAllItem();
+			if (!wishList.isEmpty() && !itemList.isEmpty()) {
+				for (String keyItem : wishList.keySet()) {
+					client = wishList.get(keyItem);
+					String[] itemNameList = keyItem.split(" ");
+					String itemName = itemNameList[0].toString();
+					for (int i = 0; i < itemList.size(); ++i) {
+						Float price = Float.valueOf(itemNameList[1]);
+						if (itemList.get(i).getName().equals(itemName)
+								&& itemList.get(i).getPrice() <= price) {
+							wishList.remove(keyItem);
+							client.notifyMe(itemList.get(i).getPersonName(),
+									itemName);
+						}
 					}
 				}
 			}
 		}
+	}
+
+	@Override
+	public int[] status(Person person) throws RemoteException {
+		int[] status = new int[2];
+		emFactory = Persistence.createEntityManagerFactory("HW3Market");
+		EntityManager em = emFactory.createEntityManager();
+		Person p = em.find(Person.class, person.getId());
+		status[0] = p.getBought();
+		status[1] = p.getSold();
+		return status;
 	}
 
 }
