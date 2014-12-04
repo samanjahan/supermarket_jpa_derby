@@ -25,6 +25,7 @@ import javax.persistence.NamedQuery;
 
 @NamedQueries({
 	@NamedQuery(name = "findItemsByUser", query = "SELECT name FROM Item name WHERE name.owner = :owner"),
+	@NamedQuery(name = "deleteItem", query = "DELETE FROM Item i WHERE i = :item"),
 	@NamedQuery(name = "findAllItems", query = "SELECT Name FROM Item Name")})
 @Entity(name = "Item")
 public class Item implements Serializable {

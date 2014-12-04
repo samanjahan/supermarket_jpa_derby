@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -19,7 +20,14 @@ import java.util.StringTokenizer;
  * 
  * @author syst3m
  */
-public class Client {
+public class Client extends UnicastRemoteObject implements CallBack {
+
+	public Client() throws RemoteException {
+		super();
+	}
+	
+	
+	private static final long serialVersionUID = -2316217043708335891L;
 	static MarketPlace marketPlace;
 	private static final String DEFAULT_MarketPlace_NAME = "Blocket";
 	private static boolean isConnected = false;
@@ -31,7 +39,7 @@ public class Client {
 	private static Person currentUser = null;
 
 	static enum CommandName {
-		newUser, deleteUser, login, logOut, showAllItem, addItem, deleteItem, quit, help, listAllMarket, wish, buy, showMyItem;
+		newUser, deleteUser, login, logOut, showAllItem, addItem, deleteItem, help, listAllMarket, wish, buy;
 	};
 
 	private static int getCommand(String userInput) {
@@ -65,6 +73,11 @@ public class Client {
 			itemName = listWord.get(1);
 			clientname = listWord.get(2);
 			return 7;
+		}
+		if (userInput.equals("wish")) {
+			itemName = listWord.get(1);
+			itemPrice = listWord.get(2);
+			return 8;
 		}
 		return 0;
 	}
@@ -116,7 +129,7 @@ public class Client {
 					currentUser = marketPlace
 							.createPerson(clientname, password);
 					if (currentUser != null) {
-						System.out.println("Wellcome " + clientname);
+						System.out.println("Welcome " + clientname);
 					} else {
 						System.out.println(clientname + " already exists!");
 					}
@@ -135,7 +148,7 @@ public class Client {
 				if (marketPlace.deleteItem(itemName)) {
 					System.out.println("succeeded!");
 				} else {
-					System.out.println("Wrong!");
+					System.out.println("Could not delete item!");
 				}
 				listWord.clear();
 				break;
@@ -151,7 +164,7 @@ public class Client {
 					System.out.println("Welcome " + clientname);
 					listWord.clear();
 				} else {
-					System.out.println("SOOORRRYYYYY");
+					System.out.println("Incorrect username or password");
 					clientname = null;
 					listWord.clear();
 				}
@@ -177,7 +190,19 @@ public class Client {
 				}
 				listWord.clear();
 				break;
+
+			case 8:
+				Client c = new Client();
+				marketPlace.wish(itemName, itemPrice, c);
+				System.out.println("OK!");
+				listWord.clear();
+				break;
+
 			}
 		}
 	}
+	 @Override
+	 public void notifyMe(String userName, String itemName) throws RemoteException {
+	 System.out.println("User " + userName + " has " + itemName + " " + "to sell");
+	 }
 }

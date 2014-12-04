@@ -7,10 +7,9 @@ package superMarket;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -19,16 +18,14 @@ import javax.persistence.Persistence;
 
 import se.kth.id2212.ex3.Account;
 
-/**
- * 
- * @author syst3m
- */
+
 public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace {
 	private static final long serialVersionUID = 3966447356658262847L;
 	private EntityManagerFactory emFactory;
 	private Person person;
-	// private Item item;
+	private CallBack client;
 	private EntityManager em = null;
+	private Map<String, CallBack> wishList = new HashMap<String, CallBack>();
 
 	public MarketPlaceImpl() throws RemoteException {
 		super();
@@ -62,6 +59,7 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace 
 		if (em.find(Item.class, item.getId()) != null) {
 			rv = true;
 		}
+		checkWish();
 		return rv;
 	}
 
@@ -142,6 +140,7 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace 
 				}
 			}
 		}
+		checkWish();
 		return person;
 	}
 
@@ -178,9 +177,9 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace 
 					if (i.getPrice() <= buyerAccount.getBalance()) {
 						buyerAccount.withdraw(i.getPrice());
 						sellerAccount.deposit(i.getPrice());
-						em.remove(i);
-						// em.createNamedQuery("deleteItem",Item.class).setParameter("item",
-						// i).executeUpdate();
+						//em.remove(i);
+						em.createNamedQuery("deleteItem",Item.class).setParameter("item",
+						i).executeUpdate();
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -206,5 +205,32 @@ public class MarketPlaceImpl extends UnicastRemoteObject implements MarketPlace 
 		return itemList;
 	}
 
+	@Override
+	public void wish(String name, String price, CallBack client)
+			throws RemoteException {
+		String item = name + " " + price;
+		wishList.put(item, client);
+	}
+
+	@Override
+	public void checkWish() throws RemoteException {
+		List<Item> itemList = listAllItem();
+		if (!wishList.isEmpty() && !itemList.isEmpty()) {
+			for (String keyItem : wishList.keySet()) {
+				client = wishList.get(keyItem);
+				String[] itemNameList = keyItem.split(" ");
+				String itemName = itemNameList[0].toString();
+				for (int i = 0; i < itemList.size(); ++i) {
+					Float price = Float.valueOf(itemNameList[1]);
+					if (itemList.get(i).getName().equals(itemName)
+							&& itemList.get(i).getPrice() <= price) {
+						wishList.remove(keyItem);
+						client.notifyMe(itemList.get(i).getPersonName(),
+								itemName);
+					}
+				}
+			}
+		}
+	}
 
 }
