@@ -145,16 +145,13 @@ public class Person implements Serializable {
         return false;
     }
     
-    public Item getItem(String names){
-        System.out.println(names);
-        for(int i = 0 ;i < items.size();++i){
-            
-            String nn =  items.get(0).getName().toString();
-            System.out.println("Items size " + nn);
-            if(nn.equals(names.toString())){
-                System.out.println("hhhääääääääääääärrrrrrrrrrrrrrr");
-                System.out.println(items.get(0));
-                System.out.println("hooohhoo " + items.get(i));
+    public Item getItem(String name){
+        System.out.println("Item name getItem Person " + name);
+        items = getALLItems();
+        for(int i = 0 ;i < items.size(); ++i){           
+            String itemName =  items.get(i).getName();
+            System.out.println("Items Name getItem " + itemName);
+            if(itemName.equals(name)){
                 Item item = items.get(i);
                 items.remove(i);
                 return item;
